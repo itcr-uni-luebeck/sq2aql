@@ -73,25 +73,25 @@ public final class Translator {
       throws Exception {
     assert inclusionExpr.getExpression().isPresent();
 
-    var select = defaultSelectClause("C");
+    var select = defaultSelectClause("COMPregistereintrag");
 
     var containsRoots = new HashSet<ContainsExpression>();
 
     inclusionExpr.getValuePathElements().stream().forEach(valuePathElements -> {
       valuePathElements.stream().reduce((curr, next) -> {
             if (containsRoots.isEmpty()) {
-              var alias = curr.openEhrType().substring(0, 1);
+              var alias = curr.alias();
               var path = ArchetypePredicate.of(curr.archetypeId());
               var classExpr = ClassExprOperand.of(curr.openEhrType(), alias, path);
               var containsExpr = ContainsExpression.of(classExpr);
               containsRoots.add(containsExpr);
             }
-            var currAlias = curr.openEhrType().substring(0, 1);
+            var currAlias = curr.alias();
             var currPath = ArchetypePredicate.of(curr.archetypeId());
             var classExpr = ClassExprOperand.of(curr.openEhrType(), currAlias, currPath);
             var currContainsExpr = ContainsExpression.of(classExpr);
 
-            var nextAlias = next.openEhrType().substring(0, 1);
+            var nextAlias = next.alias();
             var nextPath = ArchetypePredicate.of(next.archetypeId());
             var nextExpr = ClassExprOperand.of(next.openEhrType(), nextAlias, nextPath);
             var nextContainsExpr = ContainsExpression.of(nextExpr);

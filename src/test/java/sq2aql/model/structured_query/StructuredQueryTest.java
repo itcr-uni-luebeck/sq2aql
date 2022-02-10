@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import sq2aql.Container;
 import sq2aql.PrintContext;
@@ -38,7 +39,8 @@ public class StructuredQueryTest {
           AGE, Mapping.of(AGE, "DV_DURATION", List.of(
                   ValuePathElement.of("COMPOSITION", "openEHR-EHR-COMPOSITION.registereintrag.v1"),
                   ValuePathElement.of("OBSERVATION", "openEHR-EHR-OBSERVATION.age.v0")),
-              "/content[openEHR-EHR-OBSERVATION.age.v0]/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value", List.of(), "")
+              "/content[openEHR-EHR-OBSERVATION.age.v0]/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value",
+              List.of(), "")
       ),
       ConceptNode.of());
 
@@ -46,36 +48,15 @@ public class StructuredQueryTest {
   void fromJson() throws Exception {
     var mapper = new ObjectMapper();
 
-    var sq = (StructuredQuery) mapper.readValue("""
-        {
-          "inclusionCriteria": [
-            [
-                {
-                "termCode": {
-                  "system": "http://loinc.org",
-                  "code": "9279-1",
-                  "display": "Respiratory rate"
-                },
-                "valueFilter": {
-                  "type": "quantity-comparator",
-                  "comparator": "gt",
-                  "unit": {
-                    "code": "g/dl"
-                  },
-                  "value": 50
-                }
-              }
-            ]
-          ],
-          "version": "http://to_be_decided.com/draft-1/schema#"
-        }
+    var sq = mapper.readValue("""
+            {"version":"http://to_be_decided.com/draft-1/schema#","inclusionCriteria":[[{"termCodes":[{"code":"30525-0","system":"http://loinc.org","display":"Age"},{"code":"424144002","system":"http://snomed.info/sct","display":"Current chronological age (observable entity)"}],"attributeFilters":[],"valueFilter":{"type":"quantity-comparator","selectedConcepts":[],"comparator":"gt","unit":{"code":"a","display":"a"},"value":20.0,"minValue":0.0,"maxValue":0.0},"timeRestriction":{}}]]}
             """, StructuredQuery.class);
 
-    var criterion = (NumericCriterion)sq.getInclusionCriteria().get(0).get(0);
-    assertEquals(RESPIRATORY_RATE, criterion.getTermCode());
+    var criterion = (NumericCriterion) sq.getInclusionCriteria().get(0).get(0);
+    assertEquals(AGE, criterion.getTermCode());
     assertEquals(GREATER_THAN, criterion.getComparator());
-    assertEquals(BigDecimal.valueOf(50), criterion.getValue());
-    assertEquals(Optional.of("g/dl"), criterion.getUnit());
+    assertEquals(BigDecimal.valueOf(20.0), criterion.getValue());
+    assertEquals(Optional.of("a"), criterion.getUnit());
   }
 
 
@@ -84,65 +65,53 @@ public class StructuredQueryTest {
 
     return mapper.readValue("""
         {
-          "inclusionCriteria": [
-            [
-                {
-                "termCode": {
-                  "system": "http://loinc.org",
-                  "code": "9279-1",
-                  "display": "Respiratory rate"
-                },
-                "valueFilter": {
-                  "type": "quantity-comparator",
-                  "comparator": "gt",
-                  "unit": {
-                    "code": "g/dl"
-                  },
-                  "value": 50
-                }
-              },
-               {
-                "termCode": {
-                  "system": "http://loinc.org",
-                  "code": "30525-0",
-                  "display": "Age"
-                },
-                "valueFilter": {
-                  "type": "quantity-comparator",
-                  "comparator": "gt",
-                  "unit": {
-                    "code": "a"
-                  },
-                  "value": 20
-                }
-              }
-          ],
-            [
-
-            ]
-              
-          ],
-          "version": "http://to_be_decided.com/draft-1/schema#"
-        }
-            """, StructuredQuery.class);
+                                      "version": "http://to_be_decided.com/draft-1/schema#",
+                                      "display": "",
+                                      "inclusionCriteria": [
+                                        [
+                                          {
+                                            "termCodes": [
+                                              {
+                                                "code": "76689-9",
+                                                "system": "http://loinc.org",
+                                                "display": "Sex assigned at birth"
+                                              }
+                                            ],
+                                            "attributeFilters": [],
+                                            "timeRestriction": {},
+                                            "valueFilter": {
+                                              "selectedConcepts": [
+                                                {
+                                                  "code": "female",
+                                                  "system": "http://hl7.org/fhir/administrative-gender",
+                                                  "display": "Female"
+                                                }
+                                              ],
+                                              "type": "concept"
+                                            }
+                                          }
+                                        ]
+                                      ]
+                                    }                                                     """, StructuredQuery.class);
   }
 
 
+  @Disabled
   @Test
   void toAql() {
-    Criterion criterion = NumericCriterion.of(RESPIRATORY_RATE, GREATER_THAN,
+    Criterion criterion = NumericCriterion.of(List.of(RESPIRATORY_RATE), GREATER_THAN,
         BigDecimal.valueOf(20), "/min");
 
     Container<BooleanWhereExpr> container = criterion.toAql(MAPPING_CONTEXT);
 
     assert container != null;
     assertEquals("""
-            C/content[openEHR-EHR-OBSERVATION.respiration.v2]/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value/magnitude > 20 AND
-            C/content[openEHR-EHR-OBSERVATION.respiration.v2]/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value/units MATCHES {'/min'}""",
+            (O/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value/magnitude > 20 AND
+            O/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value/units MATCHES {'/min'})""",
         container.getExpression().map(e -> e.print(PrintContext.ZERO)).orElse(""));
   }
 
-
+  @Disabled
   @Test
   void toAql_duration() throws Exception {
     var sq = get_sq();
@@ -153,8 +122,17 @@ public class StructuredQueryTest {
     var mappings = objectMapper.readValue(new File(mappingsFile), Mapping[].class);
     var translator = Translator.of(MappingContext.of(
         Stream.of(mappings).collect(
-            Collectors.toMap(Mapping::getConcept, Function.identity(), (a, b) -> a)), ConceptNode.of()));
-    System.out.println(translator.toAql(sq).print(PrintContext.ZERO));
+            Collectors.toMap(Mapping::getConcept, Function.identity(), (a, b) -> a)),
+        ConceptNode.of()));
+    assertEquals("""
+            SELECT DISTINCT
+            C
+            FROM
+            EHR e
+            CONTAINS COMPOSITION C[openEHR-EHR-COMPOSITION.registereintrag.v1]
+            CONTAINS OBSERVATION O[openEHR-EHR-OBSERVATION.age.v0]
+            WHERE O/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value/value > 'P20Y'""",
+        translator.toAql(sq).print(PrintContext.ZERO));
   }
 
 

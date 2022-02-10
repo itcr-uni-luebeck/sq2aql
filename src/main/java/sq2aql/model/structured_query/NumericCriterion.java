@@ -35,8 +35,8 @@ public final class NumericCriterion extends AbstractCriterion {
   private final BigDecimal value;
   private final String unit;
 
-  private NumericCriterion(TermCode concept, Comparator comparator, BigDecimal value, String unit) {
-    super(concept, List.of());
+  private NumericCriterion(List<TermCode> concepts, Comparator comparator, BigDecimal value, String unit) {
+    super(concepts, List.of());
     this.value = Objects.requireNonNull(value);
     this.comparator = Objects.requireNonNull(comparator);
     this.unit = unit;
@@ -45,27 +45,27 @@ public final class NumericCriterion extends AbstractCriterion {
   /**
    * Returns a {@code NumericCriterion}.
    *
-   * @param concept    the concept the criterion represents
+   * @param concepts    the concept the criterion represents
    * @param comparator the comparator that should be used in the value comparison
    * @param value      the value that should be used in the value comparison
    * @return the {@code NumericCriterion}
    */
-  public static NumericCriterion of(TermCode concept, Comparator comparator, BigDecimal value) {
-    return new NumericCriterion(concept, comparator, value, null);
+  public static NumericCriterion of(List<TermCode> concepts, Comparator comparator, BigDecimal value) {
+    return new NumericCriterion(concepts, comparator, value, null);
   }
 
   /**
    * Returns a {@code NumericCriterion}.
    *
-   * @param concept    the concept the criterion represents
+   * @param concepts    the concept the criterion represents
    * @param comparator the comparator that should be used in the value comparison
    * @param value      the value that should be used in the value comparison
    * @param unit       the unit of the value
    * @return the {@code NumericCriterion}
    */
-  public static NumericCriterion of(TermCode concept, Comparator comparator, BigDecimal value,
+  public static NumericCriterion of(List<TermCode> concepts, Comparator comparator, BigDecimal value,
       String unit) {
-    return new NumericCriterion(concept, comparator, value, Objects.requireNonNull(unit));
+    return new NumericCriterion(concepts, comparator, value, Objects.requireNonNull(unit));
   }
 
   public Comparator getComparator() {
@@ -104,13 +104,13 @@ public final class NumericCriterion extends AbstractCriterion {
    * 20 years.
    */
   private String getAqlDurationRepresentation() {
-    return "P%s%s".formatted(value, UCUM_TO_ISO8601.get(unit));
+    return "P%s%s".formatted(value.setScale(0), UCUM_TO_ISO8601.get(unit));
   }
 
 
   private Container<BooleanWhereExpr> durationToAql(Mapping mapping) {
     var path = mapping.getValuePath() + "/value";
-    var alias = mapping.getValuePathElements().get(0).openEhrType().substring(0,1);
+    var alias = mapping.getValuePathElements().get(mapping.getValuePathElements().size() - 1).alias();
     var valueIdentifiedPath = IdentifiedPath.of(alias, path);
     var comparatorExpr = ComparatorExpr.of(valueIdentifiedPath, comparator, StringPrimitive.of(getAqlDurationRepresentation()));
     return Container.of(comparatorExpr, mapping.getValuePathElements());
@@ -118,7 +118,7 @@ public final class NumericCriterion extends AbstractCriterion {
 
   private Container<BooleanWhereExpr> quantityToAql(Mapping mapping) {
     var path = mapping.getValuePath();
-    var alias = mapping.getValuePathElements().get(mapping.getValuePathElements().size() - 1).openEhrType().substring(0,1);
+    var alias = mapping.getValuePathElements().get(mapping.getValuePathElements().size() - 1).alias();
     var valuePath = path + "/magnitude";
     var valueIdentifiedPath = IdentifiedPath.of(alias, valuePath);
     var comparatorExpr = ComparatorExpr.of(valueIdentifiedPath, comparator, RealPrimitive.of(value));

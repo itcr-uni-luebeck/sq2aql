@@ -1,8 +1,10 @@
 package sq2aql.model.structured_query;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.List;
 import sq2aql.Container;
 import sq2aql.model.MappingContext;
 import sq2aql.model.aql.BooleanContainsExpr;
@@ -17,6 +19,8 @@ import java.util.stream.StreamSupport;
  *
  * @author Alexander Kiel
  */
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public interface Criterion {
 
 //    /**
@@ -30,11 +34,11 @@ public interface Criterion {
 //    Criterion FALSE = mappingContext -> Container.of(BooleanContainsExpr.FALSE);
 
     @JsonCreator
-    static Criterion create(@JsonProperty("termCode") TermCode termCode,
+    static Criterion create(@JsonProperty("termCodes") List<TermCode> termCodes,
                             @JsonProperty("valueFilter") ObjectNode valueFilter,
                             @JsonProperty("timeRestriction") ObjectNode timeRestriction) {
         if (valueFilter == null) {
-            return ConceptCriterion.of(termCode);
+            return ConceptCriterion.of(termCodes);
         }
 
         var type = valueFilter.get("type").asText();
@@ -43,9 +47,9 @@ public interface Criterion {
             var value = valueFilter.get("value").decimalValue();
             var unit = valueFilter.get("unit");
             if (unit == null) {
-                return NumericCriterion.of(termCode, comparator, value);
+                return NumericCriterion.of(termCodes, comparator, value);
             } else {
-                return NumericCriterion.of(termCode, comparator, value, unit.get("code").asText());
+                return NumericCriterion.of(termCodes, comparator, value, unit.get("code").asText());
             }
         }
         if ("quantity-range".equals(type)) {
@@ -53,9 +57,9 @@ public interface Criterion {
             var upperBound = valueFilter.get("maxValue").decimalValue();
             var unit = valueFilter.get("unit");
             if (unit == null) {
-                return RangeCriterion.of(termCode, lowerBound, upperBound);
+                return RangeCriterion.of(termCodes, lowerBound, upperBound);
             } else {
-                return RangeCriterion.of(termCode, lowerBound, upperBound, unit.get("code").asText());
+                return RangeCriterion.of(termCodes, lowerBound, upperBound, unit.get("code").asText());
             }
         }
         if ("concept".equals(type)) {
@@ -63,7 +67,7 @@ public interface Criterion {
             if (selectedConcepts == null) {
                 throw new IllegalArgumentException("Missing `selectedConcepts` key in concept criterion.");
             }
-            return ValueSetCriterion.of(termCode, StreamSupport.stream(selectedConcepts.spliterator(), false)
+            return ValueSetCriterion.of(termCodes, StreamSupport.stream(selectedConcepts.spliterator(), false)
                     .map(TermCode::fromJsonNode).toArray(TermCode[]::new));
         }
         throw new IllegalArgumentException("unknown valueFilter type: " + type);
