@@ -21,8 +21,8 @@ public abstract class AbstractCriterion implements Criterion {
     final TermCode termCode;
     final List<Modifier> modifiers;
 
-    AbstractCriterion(TermCode termCode, List<Modifier> modifiers) {
-        this.termCode = Objects.requireNonNull(termCode);
+    AbstractCriterion(List<TermCode> termCodes, List<Modifier> modifiers) {
+        this.termCode = Objects.requireNonNull(termCodes.get(0));
         this.modifiers = Objects.requireNonNull(modifiers);
     }
 
@@ -34,7 +34,7 @@ public abstract class AbstractCriterion implements Criterion {
             return Container.of(containsExpr.orElseThrow(() -> new Exception("valuePath error") ));
         }
         var element = valuePathElements.get(0);
-        var alias = element.openEhrType().substring(0, 1);
+        var alias = element.alias();
         var archetype = ArchetypePredicate.of(element.archetypeId());
         var classExpr = ClassExprOperand.of(element.openEhrType(), alias, archetype);
         var expr = (containsExpr.isEmpty() ?  ContainsExpression.of(classExpr) : ContainsExpression.of(classExpr, containsExpr.get()));

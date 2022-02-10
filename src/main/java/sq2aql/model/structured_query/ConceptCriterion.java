@@ -19,19 +19,19 @@ import java.util.List;
  */
 public final class ConceptCriterion extends AbstractCriterion {
 
-    private ConceptCriterion(TermCode concept, List<Modifier> modifiers) {
-        super(concept, modifiers);
+    private ConceptCriterion(List<TermCode> concepts, List<Modifier> modifiers) {
+        super(concepts, modifiers);
     }
 
     /**
      * Returns a {@code ConceptCriterion}.
      *
-     * @param concept   the concept the criterion represents
+     * @param concepts   the concept the criterion represents
      * @param modifiers mofifiers to use in addition to {@code concept}
      * @return the {@code ConceptCriterion}.
      */
-    public static ConceptCriterion of(TermCode concept, Modifier... modifiers) {
-        return new ConceptCriterion(concept, List.of(modifiers));
+    public static ConceptCriterion of(List<TermCode> concepts, Modifier... modifiers) {
+        return new ConceptCriterion(concepts, List.of(modifiers));
     }
 
 //    /**
@@ -47,16 +47,16 @@ public final class ConceptCriterion extends AbstractCriterion {
     public Container<BooleanWhereExpr> toAql(MappingContext mappingContext) {
         //TODO: Expand code using tree! And create OR Expressions for each code
         var mapping = mappingContext.getMapping(termCode).orElseThrow(() -> new MappingNotFoundException(termCode));
-        var path = mapping.getValuePath() + "/defining_code/code_string";
-        var alias = mapping.getValuePathElements().get(mapping.getValuePathElements().size() - 1).openEhrType().substring(0,1);
+        var path = mapping.getTermCodePath() + "/defining_code/code_string";
+        var alias = mapping.getTermCodePathElements().get(mapping.getTermCodePathElements().size() - 1).alias();
         var codeIdentifiedPath = IdentifiedPath.of(alias, path);
         var codeMatchesExpr = MatchesExpr.of(codeIdentifiedPath, ValueListMatchesOperand.of(
             List.of(StringPrimitive.of(termCode.getCode()))));
-        var codSystemPath =  mapping.getValuePath() + "/defining_code/terminology_id/value";
+        var codSystemPath =  mapping.getTermCodePath() + "/defining_code/terminology_id/value";
         var codeSystemPath = IdentifiedPath.of(alias, codSystemPath);
         var codeSystemExpr = MatchesExpr.of(codeSystemPath, ValueListMatchesOperand.of(
             List.of(StringPrimitive.of(termCode.getSystem()))));
-        return Container.of(AndWhereExpr.of(codeMatchesExpr, codeSystemExpr), mapping.getValuePathElements());
+        return Container.of(AndWhereExpr.of(codeMatchesExpr, codeSystemExpr), mapping.getTermCodePathElements());
     }
 //
 //    /**

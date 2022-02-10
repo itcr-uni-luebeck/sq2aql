@@ -26,19 +26,19 @@ public final class RangeCriterion extends AbstractCriterion {
     private final BigDecimal upperBound;
     private final String unit;
 
-    private RangeCriterion(TermCode concept, BigDecimal lowerBound, BigDecimal upperBound, String unit) {
-        super(concept, List.of());
+    private RangeCriterion(List<TermCode> concepts, BigDecimal lowerBound, BigDecimal upperBound, String unit) {
+        super(concepts, List.of());
         this.lowerBound = Objects.requireNonNull(lowerBound);
         this.upperBound = Objects.requireNonNull(upperBound);
         this.unit = unit;
     }
 
-    public static RangeCriterion of(TermCode concept, BigDecimal lowerBound, BigDecimal upperBound) {
-        return new RangeCriterion(concept, lowerBound, upperBound, null);
+    public static RangeCriterion of(List<TermCode> concepts, BigDecimal lowerBound, BigDecimal upperBound) {
+        return new RangeCriterion(concepts, lowerBound, upperBound, null);
     }
 
-    public static RangeCriterion of(TermCode concept, BigDecimal lowerBound, BigDecimal upperBound, String unit) {
-        return new RangeCriterion(concept, lowerBound, upperBound, Objects.requireNonNull(unit));
+    public static RangeCriterion of(List<TermCode> concepts, BigDecimal lowerBound, BigDecimal upperBound, String unit) {
+        return new RangeCriterion(concepts, lowerBound, upperBound, Objects.requireNonNull(unit));
     }
 
     public BigDecimal getLowerBound() {
@@ -63,7 +63,7 @@ public final class RangeCriterion extends AbstractCriterion {
         if (path.isEmpty()) {
             throw new ValuePathNotFoundException(termCode);
         }
-        var alias = ehrType.substring(0, 1);
+        var alias = mapping.getValuePathElements().get(mapping.getValuePathElements().size() - 1).alias();
         var identifiedPath = IdentifiedPath.of(alias, path);
         var lowerBoundExpr = ComparatorExpr.of(identifiedPath , Comparator.GREATER_EQUAL, RealPrimitive.of(lowerBound));
         var upperBoundExpr = ComparatorExpr.of(identifiedPath, Comparator.LESS_EQUAL, RealPrimitive.of(upperBound));
