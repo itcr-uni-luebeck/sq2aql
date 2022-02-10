@@ -9,6 +9,7 @@ import sq2aql.Container;
 import sq2aql.model.MappingContext;
 import sq2aql.model.aql.BooleanContainsExpr;
 import sq2aql.model.aql.BooleanWhereExpr;
+import sq2aql.model.aql.SelectQuery;
 import sq2aql.model.common.Comparator;
 import sq2aql.model.common.TermCode;
 

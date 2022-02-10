@@ -18,6 +18,7 @@ import sq2aql.model.aql.ContainsExpression;
 import sq2aql.model.aql.FromClause;
 import sq2aql.model.aql.FromExpr;
 import sq2aql.model.aql.IdentifiedPath;
+import sq2aql.model.aql.LogicalExpression;
 import sq2aql.model.aql.OrContainsExpr;
 import sq2aql.model.aql.PathColumnExpr;
 import sq2aql.model.aql.PathPredicate;
@@ -69,15 +70,14 @@ public final class Translator {
     return new Translator(mappingContext);
   }
 
-  private static SelectQuery inclusionOnlyQuery(Container<BooleanWhereExpr> inclusionExpr)
-      throws Exception {
-    assert inclusionExpr.getExpression().isPresent();
 
-    var select = defaultSelectClause("COMPregistereintrag");
+  public Container<LogicalExpression> toSelectQuery(Container<BooleanWhereExpr> whereExpression) {
+    assert whereExpression.getExpression().isPresent();
+
 
     var containsRoots = new HashSet<ContainsExpression>();
 
-    inclusionExpr.getValuePathElements().stream().forEach(valuePathElements -> {
+    whereExpression.getValuePathElements().stream().forEach(valuePathElements -> {
       valuePathElements.stream().reduce((curr, next) -> {
             if (containsRoots.isEmpty()) {
               var alias = curr.alias();
@@ -107,12 +107,14 @@ public final class Translator {
     });
 
     var expr = containsRoots.stream().map(c -> Container.of((BooleanContainsExpr)c)).reduce(Container.empty(), Container.CONTAINS_OR);
+    var select = defaultSelectClause("COMPregistereintrag");
 
     var fromClause = defaultFromClause(expr);
 
-    var whereClause = WhereClause.of(inclusionExpr.getExpression().get());
+    var whereClause = WhereClause.of(whereExpression.getExpression().get());
 
-    return SelectQuery.of(select, fromClause, whereClause);
+    return Container.of(SelectQuery.of(select, fromClause, whereClause));
+
   }
 
 
@@ -123,8 +125,8 @@ public final class Translator {
 //     * @return the translated CQL {@link Library}
 //     * @throws TranslationException if the given {@code structuredQuery} can't be translated into a CQL {@link Library}
 //     */
-  public SelectQuery toAql(StructuredQuery structuredQuery) throws Exception {
-    Container<BooleanWhereExpr> inclusionExpr = inclusionExpr(
+  public LogicalExpression toAql(StructuredQuery structuredQuery) throws Exception {
+    Container<LogicalExpression> inclusionExpr = inclusionExpr(
         structuredQuery.getInclusionCriteria());
 //        Container<BooleanContainsExpr> exclusionExpr = exclusionExpr(structuredQuery.getExclusionCriteria());
 
@@ -132,7 +134,7 @@ public final class Translator {
       throw new IllegalStateException("Inclusion criteria lead to empty inclusion expression.");
     }
 
-    return inclusionOnlyQuery(inclusionExpr);
+    return inclusionExpr.getExpression().get();
 
 //        return exclusionExpr.isEmpty()
 //                ? inclusionOnlyLibrary(inclusionExpr)
@@ -146,12 +148,12 @@ public final class Translator {
 //     * @return a {@link Container} of the boolean inclusion expression together with the used
 //     * {@link CodeSystemDefinition CodeSystemDefinitions}
 //     */
-  private Container<BooleanWhereExpr> inclusionExpr(List<List<Criterion>> criteria) {
+  private Container<LogicalExpression> inclusionExpr(List<List<Criterion>> criteria) {
     return criteria.stream().map(this::orExpr).reduce(Container.empty(), Container.AND);
   }
 
-  private Container<BooleanWhereExpr> orExpr(List<Criterion> criteria) {
-    return criteria.stream().map(c -> c.toAql(mappingContext))
+  private Container<LogicalExpression> orExpr(List<Criterion> criteria) {
+    return criteria.stream().map(c -> c.toAql(mappingContext)).map(e -> toSelectQuery(e))
         .reduce(Container.empty(), Container.OR);
   }
 

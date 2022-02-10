@@ -3,7 +3,7 @@ package sq2aql.model.aql;
 import java.util.Objects;
 import sq2aql.PrintContext;
 
-public class SelectQuery {
+public class SelectQuery implements LogicalExpression{
   private final SelectClause selectClause;
   private final FromClause fromClause;
   private WhereClause whereClause;

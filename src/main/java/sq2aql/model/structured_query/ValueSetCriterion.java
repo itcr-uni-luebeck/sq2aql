@@ -7,6 +7,7 @@ import sq2aql.model.aql.AndWhereExpr;
 import sq2aql.model.aql.BooleanContainsExpr;
 import sq2aql.model.aql.BooleanWhereExpr;
 import sq2aql.model.aql.IdentifiedPath;
+import sq2aql.model.aql.LogicalExpression;
 import sq2aql.model.aql.MatchesExpr;
 import sq2aql.model.aql.StringPrimitive;
 import sq2aql.model.aql.ValueListMatchesOperand;
@@ -65,7 +66,7 @@ public final class ValueSetCriterion extends AbstractCriterion {
           (BooleanWhereExpr) AndWhereExpr.of(codeMatchesExpr, codeSystemExpr),
           mapping.getTermCodePathElements());
       var selectedCodeExpr = selectedConceptsWhereExpr(mappingContext);
-      return List.of(definingCodeExpr, selectedCodeExpr).stream().reduce(Container.empty(), Container.AND);
+      return List.of(definingCodeExpr, selectedCodeExpr).stream().reduce(Container.empty(), Container.WHERE_AND);
     }
     return selectedConceptsWhereExpr(mappingContext);
   }
@@ -90,7 +91,7 @@ public final class ValueSetCriterion extends AbstractCriterion {
               var definingCode = Container.of((BooleanWhereExpr) AndWhereExpr.of(codeMatchesExpr, codeSystemExpr),
                   mapping.getValuePathElements());
               return definingCode;
-            }).reduce(Container.empty(), Container.OR);
+            }).reduce(Container.empty(), Container.WHERE_OR);
   }
 
 //    public Container<BooleanContainsExpr> toAql(MappingContext mappingContext) {
