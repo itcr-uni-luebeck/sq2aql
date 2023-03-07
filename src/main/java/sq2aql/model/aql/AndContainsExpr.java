@@ -2,7 +2,6 @@ package sq2aql.model.aql;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import sq2aql.PrintContext;
 
@@ -27,7 +26,7 @@ public class AndContainsExpr implements BooleanContainsExpr {
   public static AndContainsExpr of(BooleanContainsExpr e1, BooleanContainsExpr e2) {
     if (e1 instanceof AndContainsExpr) {
       return new AndContainsExpr(Stream.concat(((AndContainsExpr) e1).expressions.stream(),
-          Stream.of(Objects.requireNonNull(e2))).collect(Collectors.toUnmodifiableList()));
+          Stream.of(Objects.requireNonNull(e2))).toList());
     }
     else if (Objects.isNull(e1))
     {
@@ -37,7 +36,6 @@ public class AndContainsExpr implements BooleanContainsExpr {
     else if (Objects.isNull(e2))
     {
       return new AndContainsExpr(List.of(e1));
-
     }
     else if (e1.equals(e2)){
       return new AndContainsExpr(List.of(e1));

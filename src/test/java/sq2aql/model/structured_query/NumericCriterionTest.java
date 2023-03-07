@@ -3,14 +3,11 @@ package sq2aql.model.structured_query;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static sq2aql.model.common.Comparator.GREATER_THAN;
 
-import com.fasterxml.jackson.annotation.JsonFormat.Value;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import sq2aql.Container;
 import sq2aql.PrintContext;
@@ -28,16 +25,19 @@ public class NumericCriterionTest {
   public static final TermCode AGE = TermCode.of("num.abide", "age", "age");
 
 
-  public static final MappingContext MAPPING_CONTEXT = MappingContext.of(Map.of(
-          RESPIRATORY_RATE, Mapping.of(RESPIRATORY_RATE, "DV_QUANTITY", List.of(
-                  ValuePathElement.of("COMPOSITION", "openEHR-EHR-COMPOSITION.registereintrag.v1"),
-                  ValuePathElement.of("OBSERVATION", "openEHR-EHR-OBSERVATION.respiration.v2")),
-              "/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value", List.of(), ""),
-          AGE, Mapping.of(AGE, "DV_DURATION", List.of(
-                  ValuePathElement.of("COMPOSITION", "openEHR-EHR-COMPOSITION.registereintrag.v1"),
-                  ValuePathElement.of("OBSERVATION", "openEHR-EHR-OBSERVATION.age.v0")),
-              "/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value", List.of(), "")
-          ),
+  public static final MappingContext MAPPING_CONTEXT = MappingContext.of(
+      Map.of(RESPIRATORY_RATE, Mapping.of(RESPIRATORY_RATE, "DV_QUANTITY", List.of(
+          ValuePathElement.of("COMPOSITION", "openEHR-EHR-COMPOSITION.report-result.v1"),
+          ValuePathElement.of("OBSERVATION", "openEHR-EHR-OBSERVATION.laboratory_test_result.v1"),
+          ValuePathElement.of("CLUSTER", "openEHR-EHR-CLUSTER.laboratory_test_analyte.v1")
+      ), "/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value", List.of(
+          ValuePathElement.of("COMPOSITION", "openEHR-EHR-COMPOSITION.report-result.v1"),
+          ValuePathElement.of("OBSERVATION", "openEHR-EHR-OBSERVATION.laboratory_test_result.v1"),
+          ValuePathElement.of("CLUSTER", "openEHR-EHR-CLUSTER.laboratory_test_analyte.v1")
+      ), "/items[at0024]/value"), AGE, Mapping.of(AGE, "DV_DURATION",
+          List.of(ValuePathElement.of("COMPOSITION", "openEHR-EHR-COMPOSITION.registereintrag.v1"),
+              ValuePathElement.of("OBSERVATION", "openEHR-EHR-OBSERVATION.age.v0")),
+          "/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value", List.of(), "")),
       ConceptNode.of());
 
   @Test
@@ -68,7 +68,6 @@ public class NumericCriterionTest {
     assertEquals(Optional.of("g/dl"), criterion.getUnit());
   }
 
-  @Disabled
   @Test
   void toAql() {
     Criterion criterion = NumericCriterion.of(List.of(RESPIRATORY_RATE), GREATER_THAN,
@@ -77,21 +76,20 @@ public class NumericCriterionTest {
     Container<BooleanWhereExpr> container = criterion.toAql(MAPPING_CONTEXT);
 
     assertEquals("""
-            (O/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value/magnitude > 20 AND
-            O/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value/units MATCHES {'/min'})""",
+            (OBSErespiration/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value/magnitude > 20 AND
+            OBSErespiration/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value/units MATCHES {'/min'})""",
         container.getExpression().map(e -> e.print(PrintContext.ZERO)).orElse(""));
   }
 
-  @Disabled
   @Test
   void toAql_duration() {
-    Criterion criterion = NumericCriterion.of(List.of(AGE), GREATER_THAN,
-        BigDecimal.valueOf(20), "a");
+    Criterion criterion = NumericCriterion.of(List.of(AGE), GREATER_THAN, BigDecimal.valueOf(20),
+        "a");
 
     Container<BooleanWhereExpr> container = criterion.toAql(MAPPING_CONTEXT);
 
     assertEquals("""
-            O/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value/value > 'P20Y'""",
+            OBSEage/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value/value > 'P20Y'""",
         container.getExpression().map(e -> e.print(PrintContext.ZERO)).orElse(""));
   }
 

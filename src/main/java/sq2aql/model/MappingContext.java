@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * @author Alexander Kiel
+ * @author Alexander Kiel, Lorenz Rosenau
  */
 public final class MappingContext {
 

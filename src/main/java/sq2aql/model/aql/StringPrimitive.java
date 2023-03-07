@@ -3,10 +3,9 @@ package sq2aql.model.aql;
 import java.util.Objects;
 import sq2aql.PrintContext;
 
-public class StringPrimitive implements  Primitive{
-  private final String value;
+public record StringPrimitive(String value) implements Primitive {
 
-  private StringPrimitive(String value) {
+  public StringPrimitive(String value) {
     this.value = Objects.requireNonNull(value);
   }
 

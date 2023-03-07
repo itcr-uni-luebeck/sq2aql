@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 /**
- * @author Alexander Kiel
+ * @author Lorenz Rosenau
  */
 class TermCodeTest {
 

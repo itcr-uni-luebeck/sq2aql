@@ -17,7 +17,7 @@ public record ValuePathElement(String openEhrType, String archetypeId, String al
     else {
       sub_string = archetypeId;
     }
-    final String alias = openEhrType.substring(0,4) + sub_string;
+    final String alias = openEhrType.substring(0,4) + sub_string.replace("-", "_");
     return new ValuePathElement(Objects.requireNonNull(openEhrType), archetypeId, alias);
   }
 }

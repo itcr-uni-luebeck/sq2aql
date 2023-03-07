@@ -8,7 +8,7 @@ import sq2aql.model.common.TermCode;
 import java.util.stream.Stream;
 
 /**
- * @author Alexander Kiel
+ * @author Alexander Kiel, Lorenz Rosenau
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public interface Modifier {

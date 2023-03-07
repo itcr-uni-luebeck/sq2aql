@@ -3,17 +3,9 @@ package sq2aql;
 /**
  * @author Alexander Kiel
  */
-public final class PrintContext {
+public record PrintContext(int indent, int precedence) {
 
     public static final PrintContext ZERO = new PrintContext(0, 0);
-
-    private final int indent;
-    private final int precedence;
-
-    private PrintContext(int indent, int precedence) {
-        this.indent = indent;
-        this.precedence = precedence;
-    }
 
     public String getIndent() {
         return " ".repeat(indent);

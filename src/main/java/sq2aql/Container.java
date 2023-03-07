@@ -11,8 +11,11 @@ import sq2aql.model.aql.AndWhereExpr;
 import sq2aql.model.aql.BooleanContainsExpr;
 import sq2aql.model.aql.BooleanWhereExpr;
 
+import sq2aql.model.aql.Intersection;
+import sq2aql.model.aql.LogicalExpression;
 import sq2aql.model.aql.OrContainsExpr;
 import sq2aql.model.aql.OrWhereExpr;
+import sq2aql.model.aql.Union;
 
 /**
  * A container holds an expression together with all valuePathElements used in the ContainsExpr.
@@ -27,9 +30,15 @@ import sq2aql.model.aql.OrWhereExpr;
 public final class Container<T> {
 
   private static final Container<?> EMPTY = new Container<>(null, Set.of());
-  public static final BinaryOperator<Container<BooleanWhereExpr>> AND = combiner(
-      AndWhereExpr::of);
-  public static final BinaryOperator<Container<BooleanWhereExpr>> OR = combiner(OrWhereExpr::of);
+  public static final BinaryOperator<Container<LogicalExpression>> AND = combiner(
+      Intersection::of);
+  public static final BinaryOperator<Container<LogicalExpression>> OR = combiner(Union::of);
+
+
+
+  public static final BinaryOperator<Container<BooleanWhereExpr>> WHERE_AND = combiner(AndWhereExpr::of);
+  public static final BinaryOperator<Container<BooleanWhereExpr>> WHERE_OR = combiner(OrWhereExpr::of);
+
 
   public static final BinaryOperator<Container<BooleanContainsExpr>> CONTAINS_OR = combiner(
       OrContainsExpr::of);
