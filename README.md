@@ -81,6 +81,8 @@ void toAQL_numeric() throws Exception {
 
 The required kds-aql-mapping.json can be generated using [Medizininformatik-Initiative fhir-ontology-generator project](https://github.com/medizininformatik-initiative/fhir-ontology-generator/blob/main/kdsToAqlMapping.py).
 
+Be aware that the translation result contains UNION, MINUS, and INTERSECT operators to combine the critieria snippets to a query. If your openEHR Repository does not support these you can use: https://github.com/geloro94/AQLClient/blob/main/main.py as a proxy.
+
 ## License
 
 sq2aql is licensed under the MIT License. See the [LICENSE](https://github.com/itcr-uni-luebeck/sq2aql/blob/main/License) file for details.
