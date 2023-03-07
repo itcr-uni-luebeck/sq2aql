@@ -184,10 +184,12 @@ public class StructuredQueryTest {
             e/ehr_id/value
             FROM
             EHR e
-            CONTAINS COMPOSITION COMPreport-result[openEHR-EHR-COMPOSITION.report-result.v1]
+            CONTAINS COMPOSITION COMPreport_result[openEHR-EHR-COMPOSITION.report-result.v1]
             CONTAINS OBSERVATION OBSElaboratory_test_result[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]
-            CONTAINS CLUSTER CLUSlaboratory_test_analyte[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1]  
-            WHERE (CLUSlaboratory_test_analyte/items[at0001]/value/magnitude > 0 AND
+            CONTAINS CLUSTER CLUSlaboratory_test_analyte[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1]
+            WHERE (CLUSlaboratory_test_analyte/items[at0024]/value/defining_code/code_string MATCHES {'19113-0'} AND
+            CLUSlaboratory_test_analyte/items[at0024]/value/defining_code/terminology_id/value MATCHES {'http://loinc.org'} AND
+            CLUSlaboratory_test_analyte/items[at0001]/value/magnitude > 0 AND
             CLUSlaboratory_test_analyte/items[at0001]/value/units MATCHES {'[IU]/L'})""",
         translator.toAql(sq).print(PrintContext.ZERO));
 
@@ -245,7 +247,7 @@ public class StructuredQueryTest {
             e/ehr_id/value
             FROM
             EHR e
-            CONTAINS COMPOSITION COMPreport-result[openEHR-EHR-COMPOSITION.report-result.v1]
+            CONTAINS COMPOSITION COMPreport_result[openEHR-EHR-COMPOSITION.report-result.v1]
             CONTAINS OBSERVATION OBSElaboratory_test_result[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]
             CONTAINS CLUSTER CLUSlaboratory_test_analyte[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1]
             WHERE (CLUSlaboratory_test_analyte/items[at0024]/value/defining_code/code_string MATCHES {'94533-7'} AND
@@ -255,7 +257,6 @@ public class StructuredQueryTest {
         translator.toAql(sq).print(PrintContext.ZERO));
 
   }
-
 
 
 }

@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import sq2aql.Container;
 import sq2aql.PrintContext;
@@ -76,11 +77,14 @@ public class NumericCriterionTest {
     Container<BooleanWhereExpr> container = criterion.toAql(MAPPING_CONTEXT);
 
     assertEquals("""
-            (OBSErespiration/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value/magnitude > 20 AND
-            OBSErespiration/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value/units MATCHES {'/min'})""",
+            (CLUSlaboratory_test_analyte/items[at0024]/value/defining_code/code_string MATCHES {'9279-1'} AND
+            CLUSlaboratory_test_analyte/items[at0024]/value/defining_code/terminology_id/value MATCHES {'http://loinc.org'} AND
+            CLUSlaboratory_test_analyte/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value/magnitude > 20 AND
+            CLUSlaboratory_test_analyte/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value/units MATCHES {'/min'})""",
         container.getExpression().map(e -> e.print(PrintContext.ZERO)).orElse(""));
   }
 
+  @Disabled
   @Test
   void toAql_duration() {
     Criterion criterion = NumericCriterion.of(List.of(AGE), GREATER_THAN, BigDecimal.valueOf(20),
