@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @author Alexander Kiel
+ * @author Alexander Kiel, Lorenz Rosenau
  */
 public final class CodingModifier extends AbstractModifier {
 

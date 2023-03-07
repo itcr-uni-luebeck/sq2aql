@@ -7,6 +7,6 @@ import sq2aql.PrintContext;
  */
 
 public interface AggregateFunctionCall extends ColumnExpr{
-  public String print(PrintContext printContext);
+  String print(PrintContext printContext);
 
 }

@@ -3,12 +3,7 @@ package sq2aql.model.aql;
 import java.util.Objects;
 import sq2aql.PrintContext;
 
-public class ArchetypePredicate implements PathPredicate{
-  private  final String archetype_hrid;
-
-  private ArchetypePredicate(String archetype_hrid) {
-    this.archetype_hrid = archetype_hrid;
-  }
+public record ArchetypePredicate(String archetype_hrid) implements PathPredicate {
 
   public static ArchetypePredicate of(String archetype_hrid) {
     return new ArchetypePredicate(archetype_hrid);
@@ -22,8 +17,12 @@ public class ArchetypePredicate implements PathPredicate{
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     ArchetypePredicate that = (ArchetypePredicate) o;
     return archetype_hrid.equals(that.archetype_hrid);
   }

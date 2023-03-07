@@ -2,7 +2,6 @@ package sq2aql.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties.Value;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import sq2aql.model.common.TermCode;
 import sq2aql.model.structured_query.Modifier;
@@ -18,7 +17,7 @@ public final class Mapping {
     private final TermCode concept;
     private final String openEhrType;
     private final List<ValuePathElement> valuePathElements;
-    private final String valuaPath;
+    private final String valuePath;
     private final List<Modifier> fixedCriteria;
     private final String termCodePath;
     private final List<ValuePathElement> termCodePathElements;
@@ -28,7 +27,7 @@ public final class Mapping {
         this.concept = Objects.requireNonNull(concept);
         this.openEhrType = Objects.requireNonNull(openEhrType);
         this.valuePathElements = valuePathElements;
-        this.valuaPath = path;
+        this.valuePath = path;
         this.fixedCriteria = Objects.requireNonNull(fixedCriteria);
         this.termCodePath = termCodePath;
         this.termCodePathElements = termCodePathElements;
@@ -72,7 +71,7 @@ public final class Mapping {
     }
 
     public String getValuePath() {
-        return valuaPath;
+        return valuePath;
     }
 
     public String getTermCodePath() {

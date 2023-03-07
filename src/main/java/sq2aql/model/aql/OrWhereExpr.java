@@ -2,23 +2,17 @@ package sq2aql.model.aql;
 
 import static java.util.stream.Collectors.joining;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import sq2aql.PrintContext;
 
-public class OrWhereExpr implements BooleanWhereExpr{
+public record OrWhereExpr(List<WhereExpr> expressions) implements
+    BooleanWhereExpr {
 
 
   public static final int PRECEDENCE = 3;
-
-  private final List<WhereExpr> expressions;
-
-  public OrWhereExpr(List<WhereExpr> expressions) {
-    this.expressions = expressions;
-  }
 
 
   @Override

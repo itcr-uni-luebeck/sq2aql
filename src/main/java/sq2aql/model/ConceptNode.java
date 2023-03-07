@@ -9,18 +9,11 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
- * @author Alexander Kiel
+ * @author Lorenz Rosenau
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ConceptNode {
-
-    private final TermCode concept;
-    private final List<ConceptNode> children;
-
-    private ConceptNode(TermCode concept, List<ConceptNode> children) {
-        this.concept = concept;
-        this.children = children;
-    }
+public record ConceptNode(TermCode concept,
+                          List<ConceptNode> children) {
 
     public static ConceptNode of() {
         return new ConceptNode(null, List.of());
@@ -28,8 +21,9 @@ public class ConceptNode {
 
     @JsonCreator
     public static ConceptNode of(@JsonProperty("termCode") TermCode concept,
-                                 @JsonProperty("children") ConceptNode... children) {
-        return new ConceptNode(Objects.requireNonNull(concept), children == null ? List.of() : List.of(children));
+        @JsonProperty("children") ConceptNode... children) {
+        return new ConceptNode(Objects.requireNonNull(concept),
+            children == null ? List.of() : List.of(children));
     }
 
     public TermCode getConcept() {
@@ -54,7 +48,7 @@ public class ConceptNode {
         if (children.isEmpty()) {
             return Stream.of(concept);
         } else {
-            return children.stream().flatMap(ConceptNode::leafConcepts);
+            return Stream.concat(Stream.of(concept), children.stream().flatMap(ConceptNode::leafConcepts));
         }
     }
 }

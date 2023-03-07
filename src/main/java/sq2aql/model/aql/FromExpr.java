@@ -2,12 +2,7 @@ package sq2aql.model.aql;
 
 import sq2aql.PrintContext;
 
-public class FromExpr {
-  private final ContainsExpr containsExpr;
-
-  private FromExpr(ContainsExpr containsExpr) {
-    this.containsExpr = containsExpr;
-  }
+public record FromExpr(ContainsExpr containsExpr) {
 
   public static FromExpr of(ContainsExpr containsExpr) {
     return new FromExpr(containsExpr);

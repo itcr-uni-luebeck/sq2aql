@@ -2,13 +2,7 @@ package sq2aql.model.aql;
 
 import sq2aql.PrintContext;
 
-public class UriMatchesOperand implements MatchesOperand{
-
-  private final String uri;
-
-  private UriMatchesOperand(String uri) {
-    this.uri = uri;
-  }
+public record UriMatchesOperand(String uri) implements MatchesOperand {
 
   public static UriMatchesOperand of(String uri) {
     return new UriMatchesOperand(uri);

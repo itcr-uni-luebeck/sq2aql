@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author Alexander Kiel
+ * @author Alexander Kiel, Lorenz Rosenau
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public final class StructuredQuery {

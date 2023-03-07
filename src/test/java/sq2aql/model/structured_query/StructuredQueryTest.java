@@ -49,8 +49,8 @@ public class StructuredQueryTest {
     var mapper = new ObjectMapper();
 
     var sq = mapper.readValue("""
-            {"version":"http://to_be_decided.com/draft-1/schema#","inclusionCriteria":[[{"termCodes":[{"code":"30525-0","system":"http://loinc.org","display":"Age"},{"code":"424144002","system":"http://snomed.info/sct","display":"Current chronological age (observable entity)"}],"attributeFilters":[],"valueFilter":{"type":"quantity-comparator","selectedConcepts":[],"comparator":"gt","unit":{"code":"a","display":"a"},"value":20.0,"minValue":0.0,"maxValue":0.0},"timeRestriction":{}}]]}
-            """, StructuredQuery.class);
+        {"version":"http://to_be_decided.com/draft-1/schema#","inclusionCriteria":[[{"termCodes":[{"code":"30525-0","system":"http://loinc.org","display":"Age"},{"code":"424144002","system":"http://snomed.info/sct","display":"Current chronological age (observable entity)"}],"attributeFilters":[],"valueFilter":{"type":"quantity-comparator","selectedConcepts":[],"comparator":"gt","unit":{"code":"a","display":"a"},"value":20.0,"minValue":0.0,"maxValue":0.0},"timeRestriction":{}}]]}
+        """, StructuredQuery.class);
 
     var criterion = (NumericCriterion) sq.getInclusionCriteria().get(0).get(0);
     assertEquals(AGE, criterion.getTermCode());
@@ -65,34 +65,31 @@ public class StructuredQueryTest {
 
     return mapper.readValue("""
         {
-                                      "version": "http://to_be_decided.com/draft-1/schema#",
-                                      "display": "",
-                                      "inclusionCriteria": [
-                                        [
-                                          {
-                                            "termCodes": [
-                                              {
-                                                "code": "76689-9",
-                                                "system": "http://loinc.org",
-                                                "display": "Sex assigned at birth"
-                                              }
-                                            ],
-                                            "attributeFilters": [],
-                                            "timeRestriction": {},
-                                            "valueFilter": {
-                                              "selectedConcepts": [
-                                                {
-                                                  "code": "female",
-                                                  "system": "http://hl7.org/fhir/administrative-gender",
-                                                  "display": "Female"
-                                                }
-                                              ],
-                                              "type": "concept"
-                                            }
-                                          }
-                                        ]
-                                      ]
-                                    }                                                     """, StructuredQuery.class);
+            "version": "http://to_be_decided.com/draft-1/schema#",
+            "display": "",
+            "inclusionCriteria": [
+                [
+                    {
+                        "termCodes": [
+                            {
+                                "code": "72166-2",
+                                "system": "http://loinc.org",
+                                "display": "Tobacco smoking status"
+                            } ],
+                        "valueFilter": {
+                            "selectedConcepts": [
+                                {
+                                    "code": "LA18976-3",
+                                    "system": "http://loinc.org",
+                                    "display": "Current every day smoker"
+                                }
+                            ],
+                            "type": "concept"
+                        }
+                    }
+                ]
+            ]
+        }                                                 """, StructuredQuery.class);
   }
 
 
@@ -134,6 +131,131 @@ public class StructuredQueryTest {
             WHERE O/data[at0001]/events[at0002]/data[at0003]/items[at0004]/value/value > 'P20Y'""",
         translator.toAql(sq).print(PrintContext.ZERO));
   }
+
+
+  StructuredQuery get_numeric_sq() throws Exception {
+    var mapper = new ObjectMapper();
+
+    return mapper.readValue("""
+        {
+          "version": "http://to_be_decided.com/draft-1/schema#",
+          "display": "",
+          "inclusionCriteria": [
+            [
+              {
+                "termCodes": [
+                  {
+                    "code": "19113-0",
+                    "system": "http://loinc.org",
+                    "display": "IgE"
+                  }
+                ],
+                "valueFilter": {
+                  "selectedConcepts": [],
+                  "type": "quantity-comparator",
+                  "unit": {
+                    "code": "[IU]/L",
+                    "display": "[IU]/L"
+                  },
+                  "value": 0,
+                  "comparator": "gt"
+                }
+              }
+            ]
+          ]
+        }""", StructuredQuery.class);
+  }
+
+
+  @Test
+  void toAQL_numeric() throws Exception {
+    var sq = get_numeric_sq();
+    var objectMapper = new ObjectMapper();
+
+    var mappingsFile = "C:\\Users\\Lorenz\\Documents\\Programmieren\\Third_Party\\sq2aql\\src\\test\\resources\\kds-aql-mapping.json";
+
+    var mappings = objectMapper.readValue(new File(mappingsFile), Mapping[].class);
+    var translator = Translator.of(MappingContext.of(
+        Stream.of(mappings).collect(
+            Collectors.toMap(Mapping::getConcept, Function.identity(), (a, b) -> a)),
+        ConceptNode.of()));
+    assertEquals("""
+            SELECT DISTINCT
+            e/ehr_id/value
+            FROM
+            EHR e
+            CONTAINS COMPOSITION COMPreport-result[openEHR-EHR-COMPOSITION.report-result.v1]
+            CONTAINS OBSERVATION OBSElaboratory_test_result[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]
+            CONTAINS CLUSTER CLUSlaboratory_test_analyte[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1]  
+            WHERE (CLUSlaboratory_test_analyte/items[at0001]/value/magnitude > 0 AND
+            CLUSlaboratory_test_analyte/items[at0001]/value/units MATCHES {'[IU]/L'})""",
+        translator.toAql(sq).print(PrintContext.ZERO));
+
+  }
+
+
+  StructuredQuery get_concept_sq() throws Exception {
+    var mapper = new ObjectMapper();
+
+    return mapper.readValue("""
+        {
+          "version": "http://to_be_decided.com/draft-1/schema#",
+          "display": "",
+          "inclusionCriteria": [
+            [
+              {
+                "termCodes": [
+                  {
+                    "code": "94533-7",
+                    "system": "http://loinc.org",
+                    "display": "SARS coronavirus 2 N gene [Presence] in Respiratory specimen by NAA with probe detection"
+                  }
+                ],
+                "valueFilter": {
+                  "selectedConcepts": [
+                    {
+                      "code": "LA6576-8",
+                      "display": "Positive",
+                      "system": "http://loinc.org"
+                    }
+                  ],
+                  "type": "concept"
+                }
+              }
+            ]
+          ]
+        }""", StructuredQuery.class);
+  }
+
+
+  @Test
+  void toAql_concept() throws Exception {
+    var sq = get_concept_sq();
+    var objectMapper = new ObjectMapper();
+
+    var mappingsFile = "C:\\Users\\Lorenz\\Documents\\Programmieren\\Third_Party\\sq2aql\\src\\test\\resources\\kds-aql-mapping.json";
+
+    var mappings = objectMapper.readValue(new File(mappingsFile), Mapping[].class);
+    var translator = Translator.of(MappingContext.of(
+        Stream.of(mappings).collect(
+            Collectors.toMap(Mapping::getConcept, Function.identity(), (a, b) -> a)),
+        ConceptNode.of()));
+    assertEquals("""
+            SELECT DISTINCT
+            e/ehr_id/value
+            FROM
+            EHR e
+            CONTAINS COMPOSITION COMPreport-result[openEHR-EHR-COMPOSITION.report-result.v1]
+            CONTAINS OBSERVATION OBSElaboratory_test_result[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]
+            CONTAINS CLUSTER CLUSlaboratory_test_analyte[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1]
+            WHERE (CLUSlaboratory_test_analyte/items[at0024]/value/defining_code/code_string MATCHES {'94533-7'} AND
+            CLUSlaboratory_test_analyte/items[at0024]/value/defining_code/terminology_id/value MATCHES {'http://loinc.org'} AND
+            CLUSlaboratory_test_analyte/items[at0001]/value/defining_code/code_string MATCHES {'LA6576-8'} AND
+            CLUSlaboratory_test_analyte/items[at0001]/value/defining_code/terminology_id/value MATCHES {'http://loinc.org'})""",
+        translator.toAql(sq).print(PrintContext.ZERO));
+
+  }
+
 
 
 }

@@ -3,7 +3,7 @@ package sq2aql.model.structured_query;
 import sq2aql.model.common.TermCode;
 
 /**
- * @author Alexander Kiel
+ * @author Alexander Kiel, Lorenz Rosenau
  */
 public class MappingNotFoundException extends TranslationException {
 

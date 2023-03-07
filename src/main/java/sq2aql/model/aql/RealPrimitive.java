@@ -3,12 +3,7 @@ package sq2aql.model.aql;
 import java.math.BigDecimal;
 import sq2aql.PrintContext;
 
-public class RealPrimitive  implements Primitive{
-  private final BigDecimal real;
-
-  private RealPrimitive(BigDecimal real) {
-    this.real = real;
-  }
+public record RealPrimitive(BigDecimal real) implements Primitive {
 
   public static RealPrimitive of(BigDecimal real) {
     return new RealPrimitive(real);

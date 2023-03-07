@@ -2,18 +2,16 @@ package sq2aql.model.aql;
 
 import static java.util.stream.Collectors.joining;
 
-import java.util.ArrayList;
 import java.util.List;
 import sq2aql.PrintContext;
 
-public class ValueListMatchesOperand implements MatchesOperand{
-  private final List<ValueListItem> valueListItems;
+public record ValueListMatchesOperand(
+    List<ValueListItem> valueListItems) implements MatchesOperand {
 
-  public ValueListMatchesOperand(List<ValueListItem> valueListItems) {
+  public ValueListMatchesOperand {
     if (valueListItems.isEmpty()) {
       throw new IllegalArgumentException("Empty lists are not allowed: " + valueListItems);
     }
-    this.valueListItems = valueListItems;
   }
 
   public static ValueListMatchesOperand of(List<ValueListItem> valueListItems) {

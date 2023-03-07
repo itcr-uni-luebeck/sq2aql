@@ -1,5 +1,7 @@
 package sq2aql.model.common;
 
+import static java.util.Objects.requireNonNull;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,21 +11,18 @@ import java.util.Objects;
 /**
  * A terminology code coding a concept.
  * <p>
- * Instances are immutable and implement {@code equals} and {@code hashCode} based on {@link #getSystem() system} and
- * {@link #getCode() code}.
+ * Instances are immutable and implement {@code equals} and {@code hashCode} based on {@link
+ * #getSystem() system} and {@link #getCode() code}.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public final class TermCode {
+public record TermCode(String system, String code, String display) {
 
-    private final String system;
-    private final String code;
-    private final String display;
-
-    private TermCode(String system, String code, String display) {
-        this.system = Objects.requireNonNull(system);
-        this.code = Objects.requireNonNull(code);
-        this.display = Objects.requireNonNull(display);
+    public TermCode {
+        requireNonNull(system);
+        requireNonNull(code);
+        requireNonNull(display);
     }
+
 
     /**
      * Returns a terminology code.
@@ -34,13 +33,15 @@ public final class TermCode {
      * @return the terminology code
      */
     @JsonCreator
-    public static TermCode of(@JsonProperty("system") String system, @JsonProperty("code") String code,
-                              @JsonProperty("display") String display) {
+    public static TermCode of(@JsonProperty("system") String system,
+        @JsonProperty("code") String code,
+        @JsonProperty("display") String display) {
         return new TermCode(system, code, display);
     }
 
     public static TermCode fromJsonNode(JsonNode node) {
-        return TermCode.of(node.get("system").asText(), node.get("code").asText(), node.get("display").asText());
+        return TermCode.of(node.get("system").asText(), node.get("code").asText(),
+            node.get("display").asText());
     }
 
     public String getSystem() {
@@ -57,8 +58,12 @@ public final class TermCode {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         TermCode termCode = (TermCode) o;
         return system.equals(termCode.system) && code.equals(termCode.code);
     }
