@@ -83,5 +83,5 @@ The required kds-aql-mapping.json can be generated using [Medizininformatik-Init
 
 ## License
 
-sq2aql is licensed under the MIT License. See the LICENSE file for details.
+sq2aql is licensed under the MIT License. See the [LICENSE](https://github.com/itcr-uni-luebeck/sq2aql/blob/main/License) file for details.
 
