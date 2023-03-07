@@ -53,30 +53,32 @@ StructuredQuery get_numeric_sq() throws Exception {
       }""", StructuredQuery.class);
 }
 
-void toAQL_numeric() throws Exception {
-  var sq = get_numeric_sq();
-  var objectMapper = new ObjectMapper();
+  void toAQL_numeric() throws Exception {
+    var sq = get_numeric_sq();
+    var objectMapper = new ObjectMapper();
 
-  var mappingsFile = "C:\\Users\\Lorenz\\Documents\\Programmieren\\Third_Party\\sq2aql\\src\\test\\resources\\kds-aql-mapping.json";
+    var mappingsFile = "C:\\Users\\Lorenz\\Documents\\Programmieren\\Third_Party\\sq2aql\\src\\test\\resources\\kds-aql-mapping.json";
 
-  var mappings = objectMapper.readValue(new File(mappingsFile), Mapping[].class);
-  var translator = Translator.of(MappingContext.of(
-      Stream.of(mappings).collect(
-          Collectors.toMap(Mapping::getConcept, Function.identity(), (a, b) -> a)),
-      ConceptNode.of()));
-  assertEquals("""
-          SELECT DISTINCT
-          e/ehr_id/value
-          FROM
-          EHR e
-          CONTAINS COMPOSITION COMPreport-result[openEHR-EHR-COMPOSITION.report-result.v1]
-          CONTAINS OBSERVATION OBSElaboratory_test_result[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]
-          CONTAINS CLUSTER CLUSlaboratory_test_analyte[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1]  
-          WHERE (CLUSlaboratory_test_analyte/items[at0001]/value/magnitude > 0 AND
-          CLUSlaboratory_test_analyte/items[at0001]/value/units MATCHES {'[IU]/L'})""",
-      translator.toAql(sq).print(PrintContext.ZERO));
+    var mappings = objectMapper.readValue(new File(mappingsFile), Mapping[].class);
+    var translator = Translator.of(MappingContext.of(
+        Stream.of(mappings).collect(
+            Collectors.toMap(Mapping::getConcept, Function.identity(), (a, b) -> a)),
+        ConceptNode.of()));
+    assertEquals("""
+            SELECT DISTINCT
+            e/ehr_id/value
+            FROM
+            EHR e
+            CONTAINS COMPOSITION COMPreport_result[openEHR-EHR-COMPOSITION.report-result.v1]
+            CONTAINS OBSERVATION OBSElaboratory_test_result[openEHR-EHR-OBSERVATION.laboratory_test_result.v1]
+            CONTAINS CLUSTER CLUSlaboratory_test_analyte[openEHR-EHR-CLUSTER.laboratory_test_analyte.v1]
+            WHERE (CLUSlaboratory_test_analyte/items[at0024]/value/defining_code/code_string MATCHES {'19113-0'} AND
+            CLUSlaboratory_test_analyte/items[at0024]/value/defining_code/terminology_id/value MATCHES {'http://loinc.org'} AND
+            CLUSlaboratory_test_analyte/items[at0001]/value/magnitude > 0 AND
+            CLUSlaboratory_test_analyte/items[at0001]/value/units MATCHES {'[IU]/L'})""",
+        translator.toAql(sq).print(PrintContext.ZERO));
 
-}
+  }
 ```
 
 The required kds-aql-mapping.json can be generated using [Medizininformatik-Initiative fhir-ontology-generator project](https://github.com/medizininformatik-initiative/fhir-ontology-generator/blob/main/kdsToAqlMapping.py).
